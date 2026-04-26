@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Produk - YouthMarket</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <!-- Navbar (Sama seperti pembeli.html) -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="pembeli.html" class="text-2xl font-bold text-indigo-600">YouthMarket.</a>
+            <a href="pembeli.html" class="text-gray-500 hover:text-indigo-600 font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Kembali
+            </a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12">
+        <div id="product-content" class="flex flex-col lg:flex-row gap-12">
+            <!-- Loading State -->
+            <div class="text-center w-full py-20 text-gray-400">Memuat detail produk...</div>
+        </div>
+    </main>
+
+    <script>
+        function loadProductDetail() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    
+    // Cari produk berdasarkan ID
+    const product = products.find(p => p.id == productId);
+
+    if (!product) {
+        document.getElementById('product-content').innerHTML = `<div class="text-center w-full py-20">Produk Tidak Ditemukan</div>`;
+        return;
+    }
+
+    const isOutOfStock = product.stock <= 0;
+
+    // Tampilkan Data
+    document.getElementById('product-content').innerHTML = `
+        <!-- Bagian Gambar -->
+        <div class="lg:w-1/2">
+            <img src="${product.image}" class="w-full h-[500px] object-cover rounded-3xl shadow-xl">
+        </div>
+
+        <!-- Bagian Info -->
+        <div class="lg:w-1/2 space-y-6">
+            <h1 class="text-4xl font-bold text-gray-900">${product.name}</h1>
+            <p class="text-3xl font-black text-indigo-600">Rp ${parseInt(product.price).toLocaleString('id-ID')}</p>
+            
+            <div class="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                <p class="text-sm text-gray-500">Stok Tersedia: <span class="font-bold">${product.stock} Pcs</span></p>
+            </div>
+
+            <!-- BAGIAN DESKRIPSI (CEK DI SINI) -->
+            <div class="pt-4">
+                <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-3">Deskripsi Produk</h3>
+                <p class="text-gray-600 leading-relaxed whitespace-pre-line text-sm">
+                    ${product.description ? product.description : 'Penjual tidak memberikan deskripsi untuk produk ini.'}
+                </p>
+            </div>
+
+            <button ${isOutOfStock ? 'disabled' : ''} class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition">
+                ${isOutOfStock ? 'Stok Habis' : 'Beli Sekarang'}
+            </button>
+        </div>
+    `;
+}
+
+        window.onload = loadProductDetail;
+    </script>
+</body>
+</html>
