@@ -22,3 +22,5 @@ harap Inbox Gmail: malvinowijaya75@gmail.com
   
 Data Update/pembaruan & Apa Yang Diperbarui/update & Waktu:
 -- Update penambahan bidang/seksi deskripsi produk | Waktu/Tanggal Update: 26 April 2026 3.40 PM/15.40 WIB
+-- Update penambahan fitur keranjang belanja pada bagian Seller & Pembeli | Waktu/tanggal Update: 26 April 2026 10.25 PM/22.25 WIB
+-- Penambahan fitur bahasa Inggris/Indonesia pada semua platform/laman website | Waktu/tanggal Update: 26 April 2026 10.25 PM/22.25 WIB
