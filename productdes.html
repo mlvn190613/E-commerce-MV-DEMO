@@ -7,71 +7,78 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-50 font-sans text-gray-900">
 
-    <!-- Navbar (Sama seperti pembeli.html) -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <nav class="bg-white shadow-sm sticky top-0 z-50 py-4 px-6">
+        <div class="container mx-auto flex justify-between items-center">
             <a href="pembeli.html" class="text-2xl font-bold text-indigo-600">YouthMarket.</a>
-            <a href="pembeli.html" class="text-gray-500 hover:text-indigo-600 font-medium">
-                <i class="fas fa-arrow-left mr-2"></i>Kembali
-            </a>
+            <div class="flex items-center gap-6">
+                <a href="pembeli.html" class="text-gray-500 hover:text-indigo-600 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i><span id="txt-back">Kembali</span>
+                </a>
+            </div>
         </div>
     </nav>
 
     <main class="container mx-auto px-6 py-12">
-        <div id="product-content" class="flex flex-col lg:flex-row gap-12">
-            <!-- Loading State -->
-            <div class="text-center w-full py-20 text-gray-400">Memuat detail produk...</div>
-        </div>
+        <div id="product-content" class="flex flex-col lg:flex-row gap-12"></div>
     </main>
 
     <script>
+        const translations = {
+            id: { back: "Kembali", availability: "Ketersediaan Produk:", stock: "Pcs", desc: "Deskripsi Produk", noDesc: "Penjual tidak memberikan deskripsi.", addCart: "+ Keranjang", buy: "Beli Sekarang", added: "Berhasil ditambah ke keranjang!" },
+            en: { back: "Back", availability: "Product Availability:", stock: "Pcs", desc: "Product Description", noDesc: "No description provided.", addCart: "+ Cart", buy: "Buy Now", added: "Added to cart successfully!" }
+        };
+
         function loadProductDetail() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    const products = JSON.parse(localStorage.getItem('products')) || [];
-    
-    // Cari produk berdasarkan ID
-    const product = products.find(p => p.id == productId);
+            const lang = localStorage.getItem('lang') || 'id';
+            const t = translations[lang];
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const product = products.find(p => p.id == productId);
 
-    if (!product) {
-        document.getElementById('product-content').innerHTML = `<div class="text-center w-full py-20">Produk Tidak Ditemukan</div>`;
-        return;
-    }
+            document.getElementById('txt-back').innerText = t.back;
 
-    const isOutOfStock = product.stock <= 0;
+            if (!product) {
+                document.getElementById('product-content').innerHTML = `<div class="text-center w-full py-20 text-2xl font-bold">Product Not Found</div>`;
+                return;
+            }
 
-    // Tampilkan Data
-    document.getElementById('product-content').innerHTML = `
-        <!-- Bagian Gambar -->
-        <div class="lg:w-1/2">
-            <img src="${product.image}" class="w-full h-[500px] object-cover rounded-3xl shadow-xl">
-        </div>
+            const isOutOfStock = product.stock <= 0;
 
-        <!-- Bagian Info -->
-        <div class="lg:w-1/2 space-y-6">
-            <h1 class="text-4xl font-bold text-gray-900">${product.name}</h1>
-            <p class="text-3xl font-black text-indigo-600">Rp ${parseInt(product.price).toLocaleString('id-ID')}</p>
-            
-            <div class="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                <p class="text-sm text-gray-500">Stok Tersedia: <span class="font-bold">${product.stock} Pcs</span></p>
-            </div>
+            document.getElementById('product-content').innerHTML = `
+                <div class="lg:w-1/2"><img src="${product.image}" class="w-full h-[500px] object-cover rounded-3xl shadow-xl border"></div>
+                <div class="lg:w-1/2 space-y-6">
+                    <div>
+                        <span class="bg-indigo-100 text-indigo-600 text-xs font-bold px-3 py-1 rounded-full uppercase">${product.category}</span>
+                        <h1 class="text-4xl font-bold text-gray-900 mt-4">${product.name}</h1>
+                        <p class="text-3xl font-black text-indigo-600 mt-2">Rp ${parseInt(product.price).toLocaleString('id-ID')}</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-xl border flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">${t.availability}</span>
+                        <span class="font-bold ${isOutOfStock ? 'text-red-500' : 'text-green-500'}">${isOutOfStock ? 'Habis' : product.stock + ' ' + t.stock}</span>
+                    </div>
+                    <div class="pt-4">
+                        <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-3">${t.desc}</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm italic">${product.description || t.noDesc}</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                        <button onclick="addToCart(${product.id})" class="flex-1 bg-white border-2 border-indigo-600 text-indigo-600 py-4 rounded-2xl font-bold hover:bg-indigo-50 transition">${t.addCart}</button>
+                        <button class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-xl transition">${t.buy}</button>
+                    </div>
+                </div>`;
+        }
 
-            <!-- BAGIAN DESKRIPSI (CEK DI SINI) -->
-            <div class="pt-4">
-                <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-3">Deskripsi Produk</h3>
-                <p class="text-gray-600 leading-relaxed whitespace-pre-line text-sm">
-                    ${product.description ? product.description : 'Penjual tidak memberikan deskripsi untuk produk ini.'}
-                </p>
-            </div>
-
-            <button ${isOutOfStock ? 'disabled' : ''} class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition">
-                ${isOutOfStock ? 'Stok Habis' : 'Beli Sekarang'}
-            </button>
-        </div>
-    `;
-}
+        function addToCart(id) {
+            const lang = localStorage.getItem('lang') || 'id';
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const product = products.find(p => p.id == id);
+            cart.push({ ...product, qty: 1, selected: true });
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert(translations[lang].added);
+        }
 
         window.onload = loadProductDetail;
     </script>
