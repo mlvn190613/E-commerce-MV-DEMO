@@ -113,7 +113,8 @@
     </main>
 
     <script>
-        function checkLogin() {
+        // --- 1. FUNGSI CEK LOGIN ---
+function checkLogin() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const btnLogin = document.getElementById('btn-login-ui');
     const userInfo = document.getElementById('user-info-ui');
@@ -121,62 +122,120 @@
     const profileImgContainer = document.getElementById('navbar-profile-img');
 
     if (currentUser) {
-        // 1. Tampilkan area User Info, sembunyikan tombol login
         if(btnLogin) btnLogin.classList.add('hidden');
         if(userInfo) userInfo.classList.remove('hidden');
-        
-        // 2. Tampilkan Nama
         if(displayUsername) displayUsername.innerText = currentUser.username;
         
-        // 3. LOGIKA FOTO PROFIL: Cek apakah user punya foto profil
         if (currentUser.profilePic) {
-            // Jika ada foto, ganti Icon dengan <img>
             profileImgContainer.innerHTML = `<img src="${currentUser.profilePic}" class="w-full h-full object-cover">`;
         } else {
-            // Jika tidak ada, gunakan icon default
             profileImgContainer.innerHTML = `<i class="fas fa-user text-indigo-600"></i>`;
         }
-
     } else {
-        // Jika belum login
         if(btnLogin) btnLogin.classList.remove('hidden');
         if(userInfo) userInfo.classList.add('hidden');
     }
 }
 
-// Pastikan fungsi ini dipanggil saat halaman selesai dimuat
-window.addEventListener('DOMContentLoaded', checkLogin);
+// --- 2. SISTEM TRANSLASI ---
+const translations = {
+    id: {
+        sell: "Mulai Jualan",
+        heroTitle: "Cari Barang Favoritmu!",
+        heroSub: "Tempat anak muda kreatif jual-beli barang berkualitas.",
+        latest: "Produk Terbaru",
+        empty: "Belum ada produk. Jadilah penjual pertama!",
+        lang: "Indonesia"
+    },
+    en: {
+        sell: "Start Selling",
+        heroTitle: "Find Your Favorite Items!",
+        heroSub: "The place for creative youth to buy & sell quality goods.",
+        latest: "Latest Products",
+        empty: "No products yet. Be the first seller!",
+        lang: "EN"
+    }
+};
 
-    function loadProducts() {
-            const productList = document.getElementById('product-list');
-            const emptyState = document.getElementById('empty-state');
-            const products = JSON.parse(localStorage.getItem('products')) || [];
+function changeLanguage(lang) {
+    localStorage.setItem('lang', lang);
+    applyLanguage();
+}
 
-            if (products.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            }
+function applyLanguage() {
+    const lang = localStorage.getItem('lang') || 'id';
+    const t = translations[lang];
 
-            productList.innerHTML = products.map(product => `
-                <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 group">
-                    <div class="relative overflow-hidden">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-56 object-cover transform group-hover:scale-110 transition duration-500">
-                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-indigo-600 text-xs font-bold px-3 py-1 rounded-full uppercase">
-                            ${product.category}
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h4 class="text-lg font-bold text-gray-800 mb-1">${product.name}</h4>
-                        <p class="text-indigo-600 font-extrabold text-xl mb-4">Rp ${parseInt(product.price).toLocaleString('id-ID')}</p>
-                        <button class="w-full bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-indigo-600 transition duration-300 flex items-center justify-center gap-2">
-                            <i class="fas fa-shopping-cart text-sm"></i> Beli Sekarang
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
+    const langText = document.getElementById('lang-text');
+    const btnSell = document.getElementById('btn-sell');
+    const heroH2 = document.querySelector('header h2');
+    const heroP = document.querySelector('header p');
+    const mainH3 = document.querySelector('main h3');
+    const flagIcon = document.getElementById('flag-icon');
 
-        window.onload = loadProducts;
+    if(langText) langText.innerText = t.lang;
+    if(btnSell) btnSell.innerText = t.sell;
+    if(heroH2) heroH2.innerText = t.heroTitle;
+    if(heroP) heroP.innerText = t.heroSub;
+    if(mainH3) mainH3.innerText = t.latest;
+    if(flagIcon) flagIcon.src = lang === 'id' ? 'https://flagcdn.com/w20/id.png' : 'https://flagcdn.com/w20/gb.png';
+    
+    loadProducts(); 
+}
+
+// --- 3. FUNGSI LOAD PRODUK ---
+function loadProducts() {
+    const productList = document.getElementById('product-list');
+    const emptyState = document.getElementById('empty-state');
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+
+    if (products.length === 0) {
+        if(emptyState) emptyState.classList.remove('hidden');
+        if(productList) productList.innerHTML = '';
+        return;
+    }
+
+    if(emptyState) emptyState.classList.add('hidden');
+
+    productList.innerHTML = products.map(product => {
+        const isOutOfStock = product.stock <= 0;
+        // Gunakan file tujuan yang benar, misal: product-detail.html
+        return `
+        <div onclick="window.location.href='productdes.html?id=${product.id}'" 
+             class="cursor-pointer bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group relative">
+            <div class="relative overflow-hidden">
+                <img src="${product.image}" alt="${product.name}" 
+                     class="w-full h-56 object-cover transform group-hover:scale-110 transition duration-500 ${isOutOfStock ? 'grayscale' : ''}">
+                <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-indigo-600 text-xs font-bold px-3 py-1 rounded-full uppercase italic">
+                    ${product.category}
+                </span>
+                ${isOutOfStock ? `<div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="text-white font-black text-xl uppercase">Habis</span></div>` : ''}
+            </div>
+            <div class="p-5">
+                <h4 class="text-lg font-bold text-gray-800 mb-1">${product.name}</h4>
+                <p class="text-indigo-600 font-extrabold text-xl mb-1">Rp ${parseInt(product.price).toLocaleString('id-ID')}</p>
+                <p class="text-[10px] text-gray-400 font-bold mb-4 uppercase tracking-wider italic">Stok: ${product.stock} Pcs</p>
+                <button ${isOutOfStock ? 'disabled' : ''} class="w-full ${isOutOfStock ? 'bg-gray-300' : 'bg-gray-900 group-hover:bg-indigo-600'} text-white py-3 rounded-xl font-semibold transition duration-300 flex items-center justify-center gap-2">
+                    <i class="fas fa-eye text-sm"></i> Lihat Detail
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// --- 4. INSIALISASI SAAT HALAMAN DIBUKA ---
+window.addEventListener('DOMContentLoaded', () => {
+    applyLanguage(); 
+    checkLogin();    
+    // loadProducts sudah dipanggil di dalam applyLanguage
+});
+
+function logout() {
+    if(confirm('Yakin ingin keluar?')) {
+        localStorage.removeItem('currentUser');
+        window.location.href = 'pembeli.html';
+    }
+}
     </script>
 </body>
 </html>
