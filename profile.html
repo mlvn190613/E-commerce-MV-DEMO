@@ -19,106 +19,131 @@
         .gradient-text {
             background: linear-gradient(90deg, #38bdf8, #818cf8);
             -webkit-background-clip: text;
-            background-clip: text; 
             -webkit-text-fill-color: transparent;
         }
         .profile-glow {
             box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
         }
+        /* Jembatan Dropdown */
+        .dropdown-bridge { padding-top: 10px; margin-top: -10px; }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
+    <!-- NAVBAR -->
     <nav class="fixed w-full z-50 glass py-4 px-6 flex justify-between items-center">
+        <!-- Kiri: Logo -->
         <h1 class="text-2xl font-bold gradient-text">YouthMarket.</h1>
-        <div class="hidden md:flex space-x-8 text-sm font-medium">
-            <a href="pembeli.html" class="hover:text-blue-400 transition">Beranda</a>
-            <a href="seller.html" class="hover:text-blue-400 transition">Dashboard Seller</a>
-            <button onclick="logout()" class="text-red-400 hover:text-red-300 transition">Keluar</button>
+        
+        <!-- Kanan: Menu Navigasi Berkumpul di Sini -->
+        <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+            
+            <!-- 1. Language Switcher (Dengan Bridge) -->
+            <div class="relative group cursor-pointer border-r pr-6 border-white/10 py-2">
+                <div class="flex items-center gap-2 text-white">
+                    <img id="flag-icon" src="https://flagcdn.com/w20/id.png" class="w-4 shadow-sm">
+                    <span id="lang-text" class="text-xs font-bold uppercase">Indonesia</span>
+                    <i class="fas fa-chevron-down text-[10px] transition-transform group-hover:rotate-180 ml-1"></i>
+                </div>
+                <!-- Dropdown Menu -->
+                <div class="absolute right-0 top-full pt-2 w-32 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <div class="glass rounded-xl shadow-xl overflow-hidden">
+                        <button onclick="changeLanguage('id')" class="w-full px-4 py-3 text-left text-[10px] hover:bg-white/10 transition font-bold text-white">Indonesia</button>
+                        <button onclick="changeLanguage('en')" class="w-full px-4 py-3 text-left text-[10px] hover:bg-white/10 transition border-t border-white/5 font-bold text-white">EN</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Link Navigasi -->
+            <a href="pembeli.html" id="nav-home" class="hover:text-blue-400 transition">Beranda</a>
+            <a href="seller.html" id="nav-seller" class="hover:text-blue-400 transition">Dashboard Seller</a>
+            <button onclick="logout()" id="nav-logout" class="text-red-400 hover:text-red-300 transition font-bold">Keluar</button>
         </div>
     </nav>
 
-    <!-- Hero / Profile Header -->
-    <section class="min-h-screen flex flex-col justify-center items-center text-center px-4">
+    <!-- HERO PROFILE -->
+    <section class="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-20">
         <div data-aos="zoom-out">
-            <!-- Avatar Upload Wrapper -->
+            <!-- Avatar Upload -->
             <div class="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-8 group cursor-pointer" onclick="document.getElementById('avatar-input').click()">
                 <div class="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-20 animate-pulse"></div>
-                <img id="main-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky" alt="Profile" class="relative w-full h-full rounded-full border-4 border-blue-500 shadow-2xl object-cover profile-glow transition group-hover:brightness-50">
-                
-                <!-- Overlay Kamera -->
+                <img id="main-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky" class="relative w-full h-full rounded-full border-4 border-blue-500 shadow-2xl object-cover profile-glow transition group-hover:brightness-50">
                 <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                     <i class="fas fa-camera text-3xl text-white"></i>
                 </div>
                 <input type="file" id="avatar-input" class="hidden" accept="image/*">
             </div>
 
+            <h2 id="txt-member-status" class="text-blue-400 font-semibold tracking-widest uppercase text-xs mb-2">Member Active</h2>
             <h1 class="text-4xl md:text-6xl font-bold mb-2">
-                Halo, <span id="user-name-display" class="gradient-text">Pengguna</span>!
+                <span id="txt-hello">Halo,</span> <span id="user-name-display" class="gradient-text">Pengguna</span>!
             </h1>
-            <p id="user-email-display" class="text-gray-400 mb-8 italic">email@kamu.com</p>
+            <p id="user-email-display" class="text-gray-400 mb-8 italic text-sm">email@kamu.com</p>
             
-            <a href="#settings" class="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-semibold transition transform hover:scale-105 inline-block">
+            <a href="#settings" id="btn-go-settings" class="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-semibold transition transform hover:scale-105 inline-block text-sm">
                 Pengaturan Akun
             </a>
         </div>
+
+        <!-- STATS CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-4xl" data-aos="fade-up">
+            <div class="glass p-8 rounded-3xl border-t-4 border-blue-500">
+                <h4 id="txt-stat-product" class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Produk</h4>
+                <p id="stat-products-count" class="text-4xl font-bold gradient-text">0</p>
+            </div>
+            <div class="glass p-8 rounded-3xl border-t-4 border-indigo-500">
+                <h4 id="txt-stat-status" class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2">Status Akun</h4>
+                <p class="text-4xl font-bold">Verified</p>
+            </div>
+            <div class="glass p-8 rounded-3xl border-t-4 border-purple-500">
+                <h4 id="txt-stat-lang" class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2">Bahasa</h4>
+                <p id="stat-lang-display" class="text-4xl font-bold italic">ID</p>
+            </div>
+        </div>
     </section>
 
-    <!-- Settings Section -->
+    <!-- SETTINGS SECTION -->
     <section id="settings" class="py-20 px-6 max-w-4xl mx-auto">
         <div class="glass p-8 md:p-12 rounded-[40px]" data-aos="fade-up">
-            <h3 class="text-2xl font-bold mb-10 flex items-center gap-3">
+            <h3 id="txt-settings-title" class="text-2xl font-bold mb-10 flex items-center gap-3">
                 <i class="fas fa-shield-halved text-blue-400"></i> Keamanan & Profil
             </h3>
             
             <form id="updateAccountForm" class="space-y-8">
-                <!-- Info Dasar -->
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-gray-400 ml-2 tracking-widest">NAMA PENGGUNA</label>
-                        <input type="text" id="edit-username" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-blue-500 outline-none transition">
+                        <label id="lbl-username" class="text-[10px] font-black text-gray-400 ml-2 tracking-widest uppercase">Nama Pengguna</label>
+                        <input type="text" id="edit-username" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-blue-500 outline-none transition text-white">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-gray-400 ml-2 tracking-widest">EMAIL</label>
-                        <input type="email" id="edit-email" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl opacity-50 cursor-not-allowed" disabled>
+                        <label id="lbl-email" class="text-[10px] font-black text-gray-400 ml-2 tracking-widest uppercase">Email</label>
+                        <input type="email" id="edit-email" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl opacity-50 cursor-not-allowed text-white" disabled>
                     </div>
                 </div>
 
                 <hr class="border-white/10">
 
-                <!-- Verifikasi Password 2 Langkah -->
                 <div class="space-y-6">
-                    <h4 class="text-sm font-bold text-blue-400 italic">Ubah Kata Sandi (Verifikasi Diperlukan)</h4>
-                    
+                    <h4 id="txt-pass-verify" class="text-sm font-bold text-blue-400 italic">Ubah Kata Sandi (Verifikasi Diperlukan)</h4>
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-gray-400 ml-2 tracking-widest uppercase">Kata Sandi Lama</label>
-                        <div class="relative">
-                            <i class="fas fa-key absolute left-4 top-4 text-gray-500"></i>
-                            <input type="password" id="old-password" placeholder="Masukkan sandi saat ini" class="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-red-500 outline-none transition">
-                        </div>
-                        <p class="text-[10px] text-gray-500 ml-2">*Wajib diisi jika ingin mengganti nama atau password baru.</p>
+                        <label id="lbl-old-pass" class="text-[10px] font-black text-gray-400 ml-2 tracking-widest uppercase">Kata Sandi Lama</label>
+                        <input type="password" id="old-password" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-red-500 outline-none transition text-white">
                     </div>
-
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-gray-400 ml-2 tracking-widest uppercase">Kata Sandi Baru</label>
-                        <div class="relative">
-                            <i class="fas fa-lock absolute left-4 top-4 text-gray-500"></i>
-                            <input type="password" id="new-password" placeholder="Biarkan kosong jika tidak ingin diubah" class="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-blue-500 outline-none transition">
-                        </div>
+                        <label id="lbl-new-pass" class="text-[10px] font-black text-gray-400 ml-2 tracking-widest uppercase">Kata Sandi Baru</label>
+                        <input type="password" id="new-password" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-blue-500 outline-none transition text-white">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-4 rounded-2xl font-bold hover:shadow-lg hover:shadow-blue-500/20 transition transform active:scale-95">
+                <button type="submit" id="btn-save-profile" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-4 rounded-2xl font-bold hover:shadow-lg hover:shadow-blue-500/20 transition transform active:scale-95 text-white">
                     Konfirmasi & Simpan Perubahan
                 </button>
             </form>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="py-10 text-center text-gray-600 text-xs">
-        &copy; 2024 YouthMarket. Sistem Keamanan Terenkripsi Local.
+        &copy; 2024 YouthMarket. Secure Local Storage.
     </footer>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -128,73 +153,119 @@
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         if (!currentUser) window.location.href = 'auth.html';
 
-        // Load Data Awal
+        // --- 1. DATA TRANSLASI ---
+        const translations = {
+            id: {
+                lang: "Indonesia", navHome: "Beranda", navSeller: "Dashboard Seller", navLogout: "Keluar",
+                member: "Member Aktif", hello: "Halo,", btnSettings: "Pengaturan Akun",
+                statProduct: "Total Produk", statStatus: "Status Akun", statLang: "Bahasa",
+                settingsTitle: "Keamanan & Profil", lblUser: "Nama Pengguna", lblEmail: "Email",
+                passVerify: "Ubah Kata Sandi (Verifikasi Diperlukan)", lblOld: "Kata Sandi Lama",
+                lblNew: "Kata Sandi Baru", btnSave: "Konfirmasi & Simpan Perubahan"
+            },
+            en: {
+                lang: "EN", navHome: "Home", navSeller: "Seller Dashboard", navLogout: "Logout",
+                member: "Active Member", hello: "Hello,", btnSettings: "Account Settings",
+                statProduct: "Total Products", statStatus: "Account Status", statLang: "Language",
+                settingsTitle: "Security & Profile", lblUser: "Username", lblEmail: "Email Address",
+                passVerify: "Change Password (Verification Required)", lblOld: "Old Password",
+                lblNew: "New Password", btnSave: "Confirm & Save Changes"
+            }
+        };
+
+        // --- 2. FUNGSI BAHASA ---
+        function applyLanguage() {
+            const lang = localStorage.getItem('lang') || 'id';
+            const t = translations[lang];
+
+            // Navbar
+            document.getElementById('lang-text').innerText = t.lang;
+            document.getElementById('flag-icon').src = lang === 'id' ? 'https://flagcdn.com/w20/id.png' : 'https://flagcdn.com/w20/gb.png';
+            document.getElementById('nav-home').innerText = t.navHome;
+            document.getElementById('nav-seller').innerText = t.navSeller;
+            document.getElementById('nav-logout').innerText = t.navLogout;
+
+            // Hero
+            document.getElementById('txt-member-status').innerText = t.member;
+            document.getElementById('txt-hello').innerText = t.hello;
+            document.getElementById('btn-go-settings').innerText = t.btnSettings;
+
+            // Stats
+            document.getElementById('txt-stat-product').innerText = t.statProduct;
+            document.getElementById('txt-stat-status').innerText = t.statStatus;
+            document.getElementById('txt-stat-lang').innerText = t.statLang;
+            document.getElementById('stat-lang-display').innerText = lang.toUpperCase();
+
+            // Form
+            document.getElementById('txt-settings-title').innerText = t.settingsTitle;
+            document.getElementById('lbl-username').innerText = t.lblUser;
+            document.getElementById('lbl-email').innerText = t.lblEmail;
+            document.getElementById('txt-pass-verify').innerText = t.passVerify;
+            document.getElementById('lbl-old-pass').innerText = t.lblOld;
+            document.getElementById('lbl-new-pass').innerText = t.lblNew;
+            document.getElementById('btn-save-profile').innerText = t.btnSave;
+        }
+
+        function changeLanguage(lang) {
+            localStorage.setItem('lang', lang);
+            applyLanguage();
+        }
+
+        // --- 3. LOAD DATA & FOTO ---
         window.onload = () => {
+            applyLanguage();
             document.getElementById('user-name-display').innerText = currentUser.username;
             document.getElementById('user-email-display').innerText = currentUser.email;
             document.getElementById('edit-username').value = currentUser.username;
             document.getElementById('edit-email').value = currentUser.email;
             
-            // Load Foto Profil jika ada
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            document.getElementById('stat-products-count').innerText = products.length;
+
             if(currentUser.profilePic) {
                 document.getElementById('main-avatar').src = currentUser.profilePic;
             }
         };
 
-        // --- FITUR GANTI FOTO PROFIL ---
         const avatarInput = document.getElementById('avatar-input');
         avatarInput.onchange = function() {
-            const file = this.files[0];
-            if (file) {
+            if (this.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const base64 = e.target.result;
                     document.getElementById('main-avatar').src = base64;
-                    
-                    // Simpan ke currentUser & Database Users
                     updateUserInStorage('profilePic', base64);
-                    alert('Foto profil berhasil diperbarui!');
+                    alert('Foto profil diperbarui!');
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(this.files[0]);
             }
         };
 
-        // --- FITUR UPDATE DATA DENGAN VERIFIKASI PASSWORD LAMA ---
         document.getElementById('updateAccountForm').onsubmit = function(e) {
             e.preventDefault();
-            
-            const oldPassInput = document.getElementById('old-password').value;
+            const oldPass = document.getElementById('old-password').value;
             const newName = document.getElementById('edit-username').value;
             const newPass = document.getElementById('new-password').value;
 
-            // VERIFIKASI: Harus memasukkan password lama yang benar
-            if (oldPassInput !== currentUser.password) {
-                alert('GAGAL: Kata sandi lama yang Anda masukkan salah!');
-                document.getElementById('old-password').classList.add('border-red-500');
+            if (oldPass !== currentUser.password) {
+                alert('Kata sandi lama salah!');
                 return;
             }
 
-            // Jika verifikasi lolos
             updateUserInStorage('username', newName);
-            if(newPass) {
-                updateUserInStorage('password', newPass);
-            }
+            if(newPass) updateUserInStorage('password', newPass);
 
-            alert('Data berhasil diperbarui!');
+            alert('Profil berhasil diperbarui!');
             location.reload();
         };
 
-        // Helper untuk update data di kedua tempat (currentUser & list users)
         function updateUserInStorage(key, value) {
-            // 1. Update Current Session
             currentUser[key] = value;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-            // 2. Update di Database User Lengkap
             let users = JSON.parse(localStorage.getItem('users')) || [];
-            const index = users.findIndex(u => u.email === currentUser.email);
-            if(index !== -1) {
-                users[index][key] = value;
+            const idx = users.findIndex(u => u.email === currentUser.email);
+            if(idx !== -1) {
+                users[idx][key] = value;
                 localStorage.setItem('users', JSON.stringify(users));
             }
         }
@@ -202,7 +273,7 @@
         function logout() {
             if(confirm('Keluar dari akun?')) {
                 localStorage.removeItem('currentUser');
-                window.location.href = 'index.html';
+                window.location.href = 'pembeli.html';
             }
         }
     </script>
