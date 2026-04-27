@@ -6,6 +6,54 @@
     <title>Detail Produk - YouthMarket</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Menyesuaikan lebar ulasan agar tidak kaku */
+#comments-display div, .snap-center {
+    width: 100%; /* Default mobile */
+    max-width: 100%;
+}
+
+@media (min-width: 768px) {
+    .snap-center {
+        min-width: 350px; /* Lebar ulasan di desktop saat mode geser */
+    }
+}
+
+/* Custom Scrollbar agar lebih estetik */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #818cf8;
+    border-radius: 10px;
+}
+
+/* Animasi Fade In Komentar Baru */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+#comments-display {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.comment-card {
+    width: 100%; /* Menyesuaikan lebar kontainer */
+    min-height: 80px; /* Minimal tinggi */
+    height: auto; /* Akan memanjang otomatis sesuai teks */
+    word-wrap: break-word; /* Agar teks panjang tidak keluar kotak */
+    overflow-wrap: break-word;
+}
+    </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-900">
 
@@ -22,9 +70,22 @@
 
     <main class="container mx-auto px-6 py-12">
         <div id="product-content" class="flex flex-col lg:flex-row gap-12"></div>
+        <!-- Kontainer Utama Ulasan -->
+<section class="mt-12 border-t border-gray-100 pt-10">
+    <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+        <i class="fas fa-comments text-indigo-600"></i> 
+        <span>Ulasan Produk</span>
+    </h3>
+    
+    <!-- Tempat Komentar Muncul (Akan diisi oleh JavaScript) -->
+    <div id="comments-display" class="space-y-4 mb-10">
+        <!-- Komentar akan dirender di sini -->
+    </div>
+</section>
     </main>
-
-    <script>
+</section>
+</body>
+<script>
         const translations = {
             id: { back: "Kembali", availability: "Ketersediaan Produk:", stock: "Pcs", desc: "Deskripsi Produk", noDesc: "Penjual tidak memberikan deskripsi.", addCart: "+ Keranjang", buy: "Beli Sekarang", added: "Berhasil ditambah ke keranjang!" },
             en: { back: "Back", availability: "Product Availability:", stock: "Pcs", desc: "Product Description", noDesc: "No description provided.", addCart: "+ Cart", buy: "Buy Now", added: "Added to cart successfully!" }
@@ -48,6 +109,7 @@
             const isOutOfStock = product.stock <= 0;
 
             document.getElementById('product-content').innerHTML = `
+
                 <div class="lg:w-1/2"><img src="${product.image}" class="w-full h-[500px] object-cover rounded-3xl shadow-xl border"></div>
                 <div class="lg:w-1/2 space-y-6">
                     <div>
@@ -67,7 +129,33 @@
                         <button onclick="addToCart(${product.id})" class="flex-1 bg-white border-2 border-indigo-600 text-indigo-600 py-4 rounded-2xl font-bold hover:bg-indigo-50 transition">${t.addCart}</button>
                         <button class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-xl transition">${t.buy}</button>
                     </div>
-                </div>`;
+                </div>
+                <section class="mt-12 border-t border-gray-100 pt-10">
+    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <i class="fas fa-comments text-indigo-600"></i> 
+        <span id="txt-rev-list-title">Ulasan Produk</span>
+    </h3>
+    
+    <!-- DAFTAR KOMENTAR YANG SUDAH ADA -->
+    <div id="comments-display" class="space-y-4 mb-10 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+        <!-- Komentar akan muncul di sini -->
+    </div>
+
+    <!-- FORM INPUT ULASAN -->
+    <div class="p-6 bg-gray-50 rounded-[30px] border border-gray-200">
+        <h4 class="font-bold mb-4" id="txt-give-rev">Berikan Ulasan Anda</h4>
+        <div class="flex gap-2 text-yellow-400 mb-4" id="star-input">
+            <i class="far fa-star cursor-pointer" onclick="setRating(1)"></i>
+            <i class="far fa-star cursor-pointer" onclick="setRating(2)"></i>
+            <i class="far fa-star cursor-pointer" onclick="setRating(3)"></i>
+            <i class="far fa-star cursor-pointer" onclick="setRating(4)"></i>
+            <i class="far fa-star cursor-pointer" onclick="setRating(5)"></i>
+        </div>
+        <textarea id="rev-comment" rows="3" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 mb-4" placeholder="Tulis komentar kamu..."></textarea>
+        <button onclick="submitReview()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition w-full md:w-auto">Kirim Ulasan</button>
+    </div>
+</section>
+`;
         }
 
         function addToCart(id) {
@@ -81,6 +169,146 @@
         }
 
         window.onload = loadProductDetail;
+            let currentRating = 0;
+    function setRating(n) {
+        currentRating = n;
+        const stars = document.getElementById('star-input').children;
+        for(let i=0; i<5; i++) {
+            stars[i].className = i < n ? 'fas fa-star cursor-pointer text-yellow-400' : 'far fa-star cursor-pointer text-yellow-400';
+        }
+    }
+
+      // PENTING: Ganti fungsi submitReview lama dengan ini
+    function submitReview() {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id'); // Ambil ID produk saat ini
+
+        if(!user) return alert('Silakan login terlebih dahulu!');
+        
+        const comment = document.getElementById('rev-comment').value;
+        if(currentRating === 0 || !comment) return alert('Mohon isi bintang dan komentar!');
+
+        const newReview = {
+            id: Date.now(),
+            productId: productId, // DISIMPAN BERDASARKAN ID PRODUK
+            userName: user.username,
+            userPic: user.profilePic || '',
+            rating: currentRating,
+            comment: comment,
+            date: new Date().toLocaleDateString()
+        };
+
+        const reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+        reviews.unshift(newReview);
+        localStorage.setItem('reviews', JSON.stringify(reviews));
+
+        alert('Ulasan berhasil diposting!');
+        location.reload();
+    }
+
+    // Fungsi untuk menampilkan komentar khusus produk ini
+    function displayProductReviews() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        const allReviews = JSON.parse(localStorage.getItem('reviews')) || [];
+        
+        // FILTER: Hanya ambil ulasan yang punya productId sama dengan halaman ini
+        const productReviews = allReviews.filter(r => r.productId === productId);
+        const container = document.getElementById('comments-display');
+
+        if(productReviews.length === 0) {
+            container.innerHTML = `<p class="text-gray-400 italic text-sm">Belum ada ulasan untuk produk ini.</p>`;
+            return;
+        }
+
+        container.innerHTML = productReviews.map(r => `
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 animate-fade-in">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-3">
+                        <img src="${r.userPic || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+r.userName}" class="w-8 h-8 rounded-full object-cover">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">${r.userName}</p>
+                            <p class="text-[10px] text-gray-400">${r.date}</p>
+                        </div>
+                    </div>
+                    <div class="text-yellow-400 text-[10px]">
+                        ${'<i class="fas fa-star"></i>'.repeat(r.rating)}
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed break-words">${r.comment}</p>
+            </div>
+        `).join('');
+    }
+
+    // Panggil fungsi ini di window.onload
+    window.onload = () => {
+        loadProductDetail();
+        displayProductReviews();
+    };
+    function displayProductReviews() {
+    // 1. Ambil ID produk dari URL (misal: ?id=12345)
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    
+    // 2. Ambil semua data ulasan dari localStorage
+    const allReviews = JSON.parse(localStorage.getItem('reviews')) || [];
+    
+    // 3. FILTER: Hanya ambil ulasan yang productId-nya cocok dengan halaman ini
+    const productReviews = allReviews.filter(r => r.productId === productId);
+    
+    const container = document.getElementById('comments-display');
+
+    // Jika belum ada ulasan sama sekali untuk produk ini
+    if (productReviews.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-10 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                <p class="text-gray-400 italic text-sm">Belum ada ulasan untuk produk ini. Jadilah yang pertama!</p>
+            </div>`;
+        return;
+    }
+
+    // 4. Urutkan dari yang terbaru (opsional)
+    productReviews.sort((a, b) => b.id - a.id);
+
+    // 5. RENDER ke HTML
+    container.innerHTML = productReviews.map(r => {
+        // Logika Rating Bintang
+        const stars = '<i class="fas fa-star text-yellow-400"></i>'.repeat(r.rating) + 
+                      '<i class="far fa-star text-gray-200"></i>'.repeat(5 - r.rating);
+
+        return `
+            <div class="bg-white p-6 rounded-[25px] shadow-sm border border-gray-100 animate-fade-in" style="height: auto;">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <!-- Foto Profil Pengulas -->
+                        <img src="${r.userPic || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + r.userName}" 
+                             class="w-10 h-10 rounded-full object-cover border border-indigo-50">
+                        <div>
+                            <p class="text-sm font-black text-gray-800">${r.userName}</p>
+                            <p class="text-[10px] text-gray-400 font-medium uppercase tracking-widest">${r.date}</p>
+                        </div>
+                    </div>
+                    <div class="flex text-[10px] gap-0.5">
+                        ${stars}
+                    </div>
+                </div>
+                <!-- Isi Komentar (Otomatis Memanjang ke Bawah) -->
+                <p class="text-gray-600 text-sm leading-relaxed break-words">
+                    ${r.comment}
+                </p>
+            </div>
+        `;
+    }).join('');
+}
+
+// PANGGIL FUNGSI INI SAAT HALAMAN DIMUAT
+window.addEventListener('DOMContentLoaded', () => {
+    // Fungsi load detail produkmu yang lama
+    if (typeof loadProductDetail === "function") loadProductDetail();
+    
+    // Panggil fungsi ulasan ini
+    displayProductReviews();
+});
     </script>
-</body>
 </html>
